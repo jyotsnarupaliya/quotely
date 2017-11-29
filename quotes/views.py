@@ -5,6 +5,9 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from .models import Quote
 import json
+from django.views.decorators.csrf import csrf_exempt
+import datetime
+
 
 # Create your views here.
 
@@ -30,13 +33,34 @@ def get_quotes_json(quotes):
 	json_quotes = json.dumps(quotes_list)
 	return json_quotes
 
+@csrf_exempt
 def quotes(request):
-	print(request.method)
-	quotes = Quote.objects.all()
+	if request.method == 'GET':
+		print(request.method)
+		quotes = Quote.objects.all()
 
-	json_quotes = get_quotes_json(quotes)
-	
-	return HttpResponse(json_quotes, content_type='application/json')
+		json_quotes = get_quotes_json(quotes)
+		
+		return HttpResponse(json_quotes, content_type='application/json')
+
+
+	if request.method == 'POST':
+		print "PoSt request recieved"
+		data = json.loads(request.body)
+
+		created_dateTime = datetime.datetime.now()
+
+		quote = Quote.objects.create(author = data["author"] , text = data["text"], created = created_dateTime)
+		quote.save()
+
+		new_quote = get_dict_from_quote(quote)
+
+		new_quote = json.dumps(new_quote)
+
+
+
+		return HttpResponse(new_quote, content_type='application/json')
+
 
 # Get by ID functions
 
@@ -51,3 +75,26 @@ def get_quote_by_id(request, quote_id):
 
 	return HttpResponse(quote, content_type = 'application/json')
 
+
+# Post functions
+
+@csrf_exempt
+def post_quotes(request):
+	if request.method == 'POST':
+		print "PoSt request recieved"
+		print(request.body)
+		return HttpResponse("PoSt request recieved")
+
+	# create_dateTime = datetime.datetime.now()
+	# data = Quote.objects.create(author = auth , text = quote, created = dreate_dateTime)
+	# data.save()
+
+	# q = { "author": quotes.author,
+	# 		"text": quotes.text,
+	# 		"created": str(quotes.created)	}
+
+	# quote = json.dumps(q)
+
+	else:
+		print "NO PoSt"
+		return HttpResponse("NO PoSt")
