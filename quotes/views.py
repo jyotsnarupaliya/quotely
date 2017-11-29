@@ -37,3 +37,17 @@ def quotes(request):
 	json_quotes = get_quotes_json(quotes)
 	
 	return HttpResponse(json_quotes, content_type='application/json')
+
+# Get by ID functions
+
+def get_quote_by_id(request, quote_id):
+	quotes = Quote.objects.get(id = quote_id)
+
+	q = { "author": quotes.author,
+			"text": quotes.text,
+			"created": str(quotes.created)	}
+
+	quote = json.dumps(q)
+
+	return HttpResponse(quote, content_type = 'application/json')
+
