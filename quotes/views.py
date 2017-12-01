@@ -12,11 +12,12 @@ import datetime
 # Create your views here.
 
 def get_dict_from_quote(quote):
-	print('hello world2')
+	# print('hello world2')
 
 	d = { "author": quote.author,
 			"text": quote.text,
-			"created": str(quote.created)	}
+			"created": str(quote.created),
+			"id": str(quote.id)	}
 
 	return d
 
@@ -63,38 +64,53 @@ def quotes(request):
 
 
 # Get by ID functions
-
-def get_quote_by_id(request, quote_id):
-	quotes = Quote.objects.get(id = quote_id)
-
-	q = { "author": quotes.author,
-			"text": quotes.text,
-			"created": str(quotes.created)	}
-
-	quote = json.dumps(q)
-
-	return HttpResponse(quote, content_type = 'application/json')
-
-
-# Post functions
-
 @csrf_exempt
-def post_quotes(request):
+def quote_by_id(request, quote_id):
+	
+	if request.method == 'GET':
+		quotes = Quote.objects.get(id = quote_id)
+
+		# print quote_id
+
+		q = { "author": quotes.author,
+				"text": quotes.text,
+				"created": str(quotes.created)	}
+
+		quote = json.dumps(q)
+
+		return HttpResponse(quote, content_type = 'application/json')
+	# return HttpResponse("get quote by id recieved")
+
 	if request.method == 'POST':
-		print "PoSt request recieved"
-		print(request.body)
-		return HttpResponse("PoSt request recieved")
+		data = json.loads(request.body)
 
-	# create_dateTime = datetime.datetime.now()
-	# data = Quote.objects.create(author = auth , text = quote, created = dreate_dateTime)
-	# data.save()
+		print request.method
+		print data
 
-	# q = { "author": quotes.author,
-	# 		"text": quotes.text,
-	# 		"created": str(quotes.created)	}
+		return HttpResponse("PoSt quote by id recieved")
 
-	# quote = json.dumps(q)
+	if request.method == 'PATCH':
 
-	else:
-		print "NO PoSt"
-		return HttpResponse("NO PoSt")
+		data = json.loads(request.body)
+
+		Quote.objects.filter(id=quote_id).update(**data)
+
+
+		print request.method
+		print data
+
+
+		# return HttpResponse("PATCH quote by id recieved\n")
+		quote = Quote.objects.get(id = quote_id)
+		new_quote = get_dict_from_quote(quote)
+		new_quote = json.dumps(new_quote)
+
+		return HttpResponse(new_quote, content_type='application/json')
+
+	if request.method == 'PUT':
+		data = json.loads(request.body)
+
+		print request.method
+		print data
+
+		return HttpResponse("PUT quote by id recieved\n")
